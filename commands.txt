@@ -1,0 +1,4 @@
+To spin up the venv
+source venv/bin/activate
+To spin down the venv
+deactivate

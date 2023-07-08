@@ -51,7 +51,7 @@ class TinyDense:
 net = TinyDense()
 Tensor.training = True #boilerplatish?
 
-from tinygrad.nn.optim import SGD, Adam, LAMB
+from tinygrad.nn.optim import SGD
 opt = SGD([net.l1.weight, net.l2.weight, net.l3.weight], lr=3e-4)
 
 from datasets import fetch_mnist
@@ -99,6 +99,7 @@ safe_save(state_dict, "TinyDense.safetensors")
 Tensor.training = False
 av_acc = 0 #reset acc
 st = time.perf_counter()
+print(X_test.shape)
 
 for step in range(100):
     #test is just fordward?
