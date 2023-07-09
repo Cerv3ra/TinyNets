@@ -35,49 +35,55 @@ Device.DEFAULT = "CPU"
 
 
 class TinyDense:
-    def __init__(self): 
-        self.l1 = Linear(784,128   , bias=False)
-        self.l2 = Linear(128,128, bias=False)
-        self.l3 = Linear(128,10, bias=False)
-    
-    def __call__(self, x):
-        x = self.l1(x)
-        x = x.leakyrelu()
-        x = self.l2(x)
-        x = x.leakyrelu()
-        x = self.l3(x)
-        return x.log_softmax(x)
+  def __init__(self):
+    self.l1 = Linear(784, 128, bias=False)
+    self.l2 = Linear(128, 10, bias=False)
+
+  def __call__(self, x):
+    x = self.l1(x)
+    x = x.leakyrelu()
+    x = self.l2(x)
+    return x.log_softmax()
 
 net = TinyDense()
 Tensor.training = True #boilerplatish?
 
 from tinygrad.nn.optim import SGD
-opt = SGD([net.l1.weight, net.l2.weight, net.l3.weight], lr=3e-4)
+opt = SGD([net.l1.weight, net.l2.weight], lr=3e-4)
 
-from datasets import fetch_mnist
+from extra.datasets import fetch_mnist
 X_train, Y_train, X_test, Y_test = fetch_mnist()
 
 from extra.training import sparse_categorical_crossentropy  
 from tinygrad.state import safe_save, safe_load, get_state_dict, load_state_dict
+def cross_entropy(out, Y):
+  num_classes = out.shape[-1]
+  YY = Y.flatten().astype(np.int32)
+  y = np.zeros((YY.shape[0], num_classes), np.float32)
+  y[range(y.shape[0]),YY] = -1.0*num_classes
+  y = y.reshape(list(Y.shape)+[num_classes])
+  y = Tensor(y)
+  return out.mul(y).mean()
+
+#load model
 
 state_dict = safe_load("TinyDense.safetensors")
 load_state_dict(net, state_dict)
 
-for step in range(6000):
+for step in range(8000):
     #random sample batch??
-    
     samp = np.random.randint(0, X_train.shape[0], size=(128))
-    batch = Tensor(X_train[samp], requires_grad=False)
+    batch = Tensor(X_train[samp], requires_grad=True)
     #labels for the same random sample? Batch of 64?
     labels = Y_train[samp]
     #fordward pass
     out = net (batch)
 
     #compute loss
-    loss = sparse_categorical_crossentropy(out, labels)
+    loss = cross_entropy(out, labels)
     #zero gradients
     opt.zero_grad()
-    #backward
+    #backward   
     loss.backward()
     #update param
     opt.step()
@@ -85,7 +91,7 @@ for step in range(6000):
     #calculate accuracy
     pred = np.argmax(out.numpy(), axis=-1)
     acc = (pred == labels).mean()
-    if acc > .95:
+    if acc >= 1:
         break
     if step % 100 == 0:
         print(f'step{step} | Loss: {loss.numpy()} | Accuracy: {acc}')
@@ -100,21 +106,23 @@ Tensor.training = False
 av_acc = 0 #reset acc
 st = time.perf_counter()
 print(X_test.shape)
-
-for step in range(100):
+testamount = 1
+for step in range(testamount):
     #test is just fordward?
-    samp = np.random.randint(0, X_test.shape[0], size=128)
-    batch = Tensor(X_test[samp], requires_grad=False)
+    samp = np.random.randint(0, X_test.shape[0], size=64)
+    batch = Tensor(X_test[samp], requires_grad=True)
     #get labels
     labels = Y_test[samp]
     #forward pass
     out = net(batch)
-
+    
     pred = np.argmax(out.numpy(), axis=-1)
     av_acc += (pred == labels).mean()
+    print(out.shape)
  
-print(f"Test Accuracy: {av_acc / 1000}")
+print(f"Test Accuracy: {av_acc / testamount}")
 print(f"Time: {time.perf_counter() - st}")
+#94% MNIST? 
 
 #enable continue training after the first for-loop, I dont want it to reset
 #feed a imagelieren and test result? 
