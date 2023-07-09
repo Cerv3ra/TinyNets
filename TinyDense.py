@@ -109,16 +109,19 @@ print(X_test.shape)
 testamount = 1
 for step in range(testamount):
     #test is just fordward?
-    samp = np.random.randint(0, X_test.shape[0], size=64)
+    samp = np.random.randint(0, X_test.shape[0], size=1)
     batch = Tensor(X_test[samp], requires_grad=True)
     #get labels
     labels = Y_test[samp]
     #forward pass
     out = net(batch)
-    
+  
     pred = np.argmax(out.numpy(), axis=-1)
     av_acc += (pred == labels).mean()
     print(out.shape)
+    print(np.argmax(out.numpy()))
+    print(Y_test[samp])
+    print(batch.numpy())
  
 print(f"Test Accuracy: {av_acc / testamount}")
 print(f"Time: {time.perf_counter() - st}")

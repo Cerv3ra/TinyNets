@@ -10,10 +10,10 @@ state_dict = safe_load("TinyDense.safetensors")
 net = get_state_dict
 #Load Image
 img = cv2.imread('3s.png')
+print(img)
 imglabel = 3 #Output expected
 #print(img.shape)
 
 
-print(net)
 
 #print val result
