@@ -4,6 +4,7 @@ import os
 import cv2
 import gzip
 import pandas as pd
+import time
 # %%
 # #load file
 # img = cv2.imread('6.png', cv2.IMREAD_GRAYSCALE)
@@ -20,10 +21,15 @@ import pandas as pd
 # cv2.imwrite('grey6.bmp',img)
 
 # %%
+start = time.monotonic()
 def imgconver(input, output):
     a=cv2.imread(input, cv2.IMREAD_GRAYSCALE)
     a=cv2.resize(a, dsize=(28,28))
-    a=cv2.invert(a)
+    a=255 -a 
     cv2.imwrite(output, a)
 
-imgconver('6.png','3.bmp')
+
+
+imgconver('6.png','6.bmp')
+end = time.monotonic()
+print(f"{end-start:.2}s")

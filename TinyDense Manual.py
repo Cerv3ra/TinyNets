@@ -106,9 +106,11 @@ import cv2
 
 
 #Load Image
-img = cv2.imread('grey3.bmp', cv2.IMREAD_GRAYSCALE)
-imglabel = [3] #Output expected
+img = cv2.imread('6.bmp', cv2.IMREAD_GRAYSCALE)
 
+imglabel = [6] #Output expected
+imgc = np.where(img <80, 0 , 255)
+print(imgc.shape)
 #print(img.shape)
 
 
@@ -117,13 +119,13 @@ imglabel = [3] #Output expected
 Tensor.training = False
 av_acc = 0 #reset acc
 st = time.perf_counter()
-print(X_test.shape)
+#print(X_test.shape)
 testamount = 1
 for step in range(testamount):
     #test is just fordward?
     samp = np.random.randint(0, X_test.shape[0], size=1)
     #batch = Tensor(X_test[samp])
-    batch = Tensor(np.concatenate(img))
+    batch = Tensor(np.concatenate(imgc).astype('float32'))
     #get labels
     #labels = Y_test[samp]
     labels = imglabel
@@ -133,7 +135,7 @@ for step in range(testamount):
     pred = np.argmax(out.numpy(), axis=-1)
     av_acc += (pred == labels).mean()
     print(batch.numpy())
-    print(np.argmax(out.numpy()))
+    print(pred)
     print(labels)
  
 print(f"Test Accuracy: {av_acc / testamount}")
