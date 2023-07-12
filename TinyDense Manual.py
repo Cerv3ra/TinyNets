@@ -46,7 +46,7 @@ class TinyDense:
     return x.log_softmax()
 
 net = TinyDense()
-Tensor.training = True #boilerplatish?
+Tensor.training = False #boilerplatish?
 
 from tinygrad.nn.optim import SGD
 opt = SGD([net.l1.weight, net.l2.weight], lr=3e-4)
@@ -106,10 +106,10 @@ import cv2
 
 
 #Load Image
-img = cv2.imread('3s.png')
-imglabel = 3 #Output expected
-#print(img.shape)
+img = cv2.imread('grey3.bmp', cv2.IMREAD_GRAYSCALE)
+imglabel = [3] #Output expected
 
+#print(img.shape)
 
 
 #print val result
@@ -122,18 +122,19 @@ testamount = 1
 for step in range(testamount):
     #test is just fordward?
     samp = np.random.randint(0, X_test.shape[0], size=1)
-    batch = Tensor(np.concatenate(img), requires_grad=True)
+    #batch = Tensor(X_test[samp])
+    batch = Tensor(np.concatenate(img))
     #get labels
-    labels = [3]
+    #labels = Y_test[samp]
+    labels = imglabel
     #forward pass
     out = net(batch)
   
     pred = np.argmax(out.numpy(), axis=-1)
     av_acc += (pred == labels).mean()
-    print(out.shape)
-    print(np.argmax(out.numpy()))
-    print(Y_test[samp])
     print(batch.numpy())
+    print(np.argmax(out.numpy()))
+    print(labels)
  
 print(f"Test Accuracy: {av_acc / testamount}")
 print(f"Time: {time.perf_counter() - st}")

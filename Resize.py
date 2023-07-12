@@ -2,9 +2,28 @@
 import numpy as np
 import os
 import cv2
-#load file
-img = cv2.imread('3.png')
-assert img is not None, "File could not be read, are you pointing at it correctly brub?"
-#print output stringclear
-imgre = cv2.resize(img, dsize=(28,28))
-print(imgre.shape)
+import gzip
+import pandas as pd
+# %%
+# #load file
+# img = cv2.imread('6.png', cv2.IMREAD_GRAYSCALE)
+# assert img is not None, "File could not be read, are you pointing at it correctly brub?"
+# #print output stringclear
+# img = cv2.resize(img, dsize=(28,28))
+# #print(img.shape)
+
+# #let's open up data from the actual MNIST. 
+
+# #solution is to slice my [28x28x3] Tensor into a Flat 2D array. Let's try that out
+# img = (255-img)
+# print(img)
+# cv2.imwrite('grey6.bmp',img)
+
+# %%
+def imgconver(input, output):
+    a=cv2.imread(input, cv2.IMREAD_GRAYSCALE)
+    a=cv2.resize(a, dsize=(28,28))
+    a=cv2.invert(a)
+    cv2.imwrite(output, a)
+
+imgconver('6.png','3.bmp')
