@@ -11,12 +11,15 @@ import cv2
 start =time.monotonic()
 X_train, Y_train = fetch_cifar(train=True)
 
-print(X_train.shape)
-#(50000, 3, 32, 32) So 50k pics, RBG 32x32. 
-#extract one 3,32,32
-print(X_train[1,:,:,:].shape)
-#img = np.transpose(X_train[4,:,:,:], (1,2,0))
-#cv2.imwrite('firstpic.png',img)
+# print(X_train.shape)
+# #(50000, 3, 32, 32) So 50k pics, RBG 32x32. 
+# #extract one 3,32,32 numpy.transpose(xtrain, (initial order in the order you want 
+# # in this case my (3,32,32) matrix has to become (32,32,3) so we transpose to (1,2,0)
+
+
+# print(X_train[1,:,:,:].shape)
+# #img = np.transpose(X_train[4,:,:,:], (1,2,0))
+# #cv2.imwrite('firstpic.png',img)
 
 
 ##Figure out a NN
@@ -25,9 +28,9 @@ from tinygrad.tensor import Tensor
 
 class TinyCIFAR:
     def __init__ (self):
-        self.l1 = Linear(3072,1024)
-        self.l2 = Linear(1024,1024)
-        self.l3 = Linear(1024,10)
+        self.l1 = Linear(3072,1024, bias=True)
+        self.l2 = Linear(1024,1024,bias=True)
+        self.l3 = Linear(1024,10, bias=True)
 
     def __call__ (self, x):
         x = self.l1(x)
@@ -36,6 +39,26 @@ class TinyCIFAR:
         x = x.leakyrelu()
         x = self.l3(x)
         return x.log_softmax()
+
+from extra.training import sparse_categorical_crossentropy
+
+
+net = TinyCIFAR()
+Tensor.training= True
+BS= 32
+#run the modelieren
+print(X_train.shape[0])
+for step in range(100):
+    samp=np.random.randint(0, X_train.shape[0], size=BS)
+    batch = Tensor(X_train[samp], requires_grad=True)
+    labels = Y_train[samp]
+    out = net(batch)
+    loss = sparse_categorical_crossentropy(out,labels)
+    opt.zero_grad()
+    loss.backward()
+    opt.step()
+
+
 
 
 
